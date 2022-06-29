@@ -6,11 +6,12 @@ const universe = Universe.new();
 var ignoring = 3;
 const renderLoop = () => {
     pre.textContent = universe.render();
-
+    
     ignoring -= 1;
     if (ignoring < 0) {
         ignoring = 3;
         universe.tick();
+        debugger;
     }
 
     requestAnimationFrame(renderLoop);

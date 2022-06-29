@@ -7,6 +7,13 @@ use wasm_bindgen::prelude::*;
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+extern crate web_sys;
+
+macro_rules! log {
+    ( $( $t:tt )* ) => {
+        web_sys::console::log_1(&format!( $( $t )* ).into());
+    };
+}
 
 #[wasm_bindgen]
 extern "C" {
@@ -88,6 +95,7 @@ impl Universe {
 #[wasm_bindgen]
 impl Universe {
     pub fn new() -> Universe {
+        utils::set_panic_hook();
         let width = 64;
         let height = 64;
 
@@ -113,11 +121,22 @@ impl Universe {
     pub fn tick(&mut self) {
         let mut next = self.cells.clone();
 
+        let mut new_living_cells: Vec<(u32, u32)> = Vec::new();
+        let mut new_dead_cells: Vec<(u32, u32)> = Vec::new();
+
         for row in 0..self.height {
             for column in 0..self.width {
                 let idx = self.get_index(row, column);
                 let cell = self.cells[idx];
                 let live_neighbors = self.live_neighbor_count(row, column);
+
+                log!(
+                    "cell[{}, {}] is initially {:?} and has {} live neighbors",
+                    row,
+                    column,
+                    cell,
+                    live_neighbors
+                );
 
                 let next_cell = match (cell, live_neighbors) {
                     (Cell::Alive, x) if x < 2 => Cell::Dead,
@@ -127,10 +146,20 @@ impl Universe {
                     (otherwise, _) => otherwise,
                 };
 
+                log!("   it becomes {:?}", next_cell);
+
+                match (cell != next_cell, next_cell) {
+                    (true, Cell::Alive) => new_living_cells.push((row, column)),
+                    (true, Cell::Dead) => new_dead_cells.push((row, column)),
+                    _ => {},
+                }
+
                 next[idx] = next_cell;
             }
         }
 
+        log!("new living cells ({}): {:?}", new_living_cells.len(), new_living_cells);
+        log!("new dead cells ({}): {:?}", new_dead_cells.len(), new_dead_cells);
         self.cells = next;
     }
 
