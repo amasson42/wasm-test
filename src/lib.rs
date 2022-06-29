@@ -15,6 +15,12 @@ macro_rules! log {
     };
 }
 
+extern crate js_sys;
+
+fn random_bool() -> bool {
+    js_sys::Math::random() < 0.5
+}
+
 #[wasm_bindgen]
 extern "C" {
     fn alert(s: &str);
@@ -31,6 +37,15 @@ pub fn greet(name: &str) {
 pub enum Cell {
     Dead = 0,
     Alive = 1,
+}
+
+impl Cell {
+    fn toggle(&mut self) {
+        *self = match *self {
+            Cell::Dead => Cell::Alive,
+            Cell::Alive => Cell::Dead,
+        };
+    }
 }
 
 #[wasm_bindgen]
@@ -67,45 +82,70 @@ impl Universe {
     }
 }
 
-fn make_line_cells(width: u32, height: u32) -> Vec<Cell> {
-    (0..width * height)
-        .map(|i| {
-            if i % 2 == 0 || i % 7 == 0 {
-                Cell::Alive
-            } else {
-                Cell::Dead
-            }
-        })
-        .collect()
+#[wasm_bindgen]
+pub enum CellMotif {
+    Lines,
+    Spaceship,
+    Random,
 }
 
-impl Universe {
-    pub fn get_cells(&self) -> &[Cell] {
-        &self.cells
-    }
-
-    pub fn set_cells(&mut self, cells: &[(u32, u32)]) {
-        for (row, column) in cells.iter().cloned() {
-            let idx = self.get_index(row, column);
-            self.cells[idx] = Cell::Alive;
+fn make_cells(width: u32, height: u32, motif: CellMotif) -> Vec<Cell> {
+    let ranger = 0..width * height;
+    match motif {
+        CellMotif::Lines => ranger
+            .map(|i| {
+                if i % 2 == 0 || i % 7 == 0 {
+                    Cell::Alive
+                } else {
+                    Cell::Dead
+                }
+            })
+            .collect(),
+        CellMotif::Spaceship => {
+            let mut cells: Vec<Cell> = ranger.map(|_i| Cell::Dead).collect();
+            for i in [0, width + 1, width + 2, 2 * width, 2 * width + 1] {
+                cells[i as usize] = Cell::Alive;
+            }
+            cells
         }
+        CellMotif::Random => ranger
+            .map(|_i| {
+                if random_bool() {
+                    Cell::Alive
+                } else {
+                    Cell::Dead
+                }
+            })
+            .collect(),
     }
 }
 
 #[wasm_bindgen]
 impl Universe {
-    pub fn new() -> Universe {
+    pub fn new(motif: CellMotif) -> Universe {
         utils::set_panic_hook();
         let width = 64;
         let height = 64;
 
-        let cells = make_line_cells(width, height);
+        let cells = make_cells(width, height, motif);
 
         Universe {
             width,
             height,
             cells,
         }
+    }
+
+    pub fn width(&self) -> u32 {
+        self.width
+    }
+
+    pub fn height(&self) -> u32 {
+        self.height
+    }
+
+    pub fn cells(&self) -> *const Cell {
+        self.cells.as_ptr()
     }
 
     pub fn set_width(&mut self, width: u32) {
@@ -116,6 +156,11 @@ impl Universe {
     pub fn set_height(&mut self, height: u32) {
         self.height = height;
         self.cells = self.make_cells();
+    }
+
+    pub fn toggle_cell(&mut self, row: u32, column: u32) {
+        let idx = self.get_index(row, column);
+        self.cells[idx].toggle();
     }
 
     pub fn tick(&mut self) {
@@ -151,15 +196,23 @@ impl Universe {
                 match (cell != next_cell, next_cell) {
                     (true, Cell::Alive) => new_living_cells.push((row, column)),
                     (true, Cell::Dead) => new_dead_cells.push((row, column)),
-                    _ => {},
+                    _ => {}
                 }
 
                 next[idx] = next_cell;
             }
         }
 
-        log!("new living cells ({}): {:?}", new_living_cells.len(), new_living_cells);
-        log!("new dead cells ({}): {:?}", new_dead_cells.len(), new_dead_cells);
+        log!(
+            "new living cells ({}): {:?}",
+            new_living_cells.len(),
+            new_living_cells
+        );
+        log!(
+            "new dead cells ({}): {:?}",
+            new_dead_cells.len(),
+            new_dead_cells
+        );
         self.cells = next;
     }
 
@@ -181,5 +234,19 @@ impl fmt::Display for Universe {
         }
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+impl Universe {
+    pub fn get_cells(&self) -> &[Cell] {
+        &self.cells
+    }
+
+    pub fn set_cells(&mut self, cells: &[(u32, u32)]) {
+        for (row, column) in cells.iter().cloned() {
+            let idx = self.get_index(row, column);
+            self.cells[idx] = Cell::Alive;
+        }
     }
 }

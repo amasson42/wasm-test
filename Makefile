@@ -9,7 +9,7 @@ setup:
 
 build:
 	wasm-pack build
-	cd www && npm install
+	# cd www && npm install
 
 run:
 	cd www && npm run start
