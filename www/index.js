@@ -63,14 +63,15 @@ function drawCells() {
 
 let animationId = null;
 
-var ignoring = 3;
+var maxRenderCooldown = 1.0;
+var renderCooldown = maxRenderCooldown;
 const renderLoop = () => {
     drawGrid();
     drawCells();
 
-    ignoring -= 1;
-    if (ignoring < 0) {
-        ignoring = 3;
+    renderCooldown -= 1.0;
+    while (renderCooldown < 0) {
+        renderCooldown += maxRenderCooldown;
         universe.tick();
         debugger;
     }
@@ -144,3 +145,11 @@ canvas.addEventListener("click", event => {
     drawCells();
 });
 
+const tickspeedSlider = document.getElementById("tickspeed-slider");
+const tickspeedIndicator = document.getElementById("tickspeed-indicator");
+tickspeedSlider.oninput = function() {
+    let speedValue = this.value / 100.0 + 0.5;
+    speedValue = 1.0 / (speedValue * speedValue * speedValue);
+    tickspeedIndicator.innerText = `${this.value} => ${speedValue}`;
+    maxRenderCooldown = speedValue;
+}
