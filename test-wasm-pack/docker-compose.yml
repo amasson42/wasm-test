@@ -10,5 +10,3 @@ services:
       - .:/app
     working_dir: /app/www
     command: ["npm", "run", "start"]
-
-# nginx path: /usr/share/nginx/html

@@ -9,10 +9,13 @@ setup:
 
 build:
 	wasm-pack build
-	# cd www && npm install
+	cd www && npm install
 
 run:
 	cd www && npm run start
 
 test:
 	wasm-pack test --firefox --headless
+
+clean:
+	cargo clean
