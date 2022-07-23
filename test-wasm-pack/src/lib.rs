@@ -26,6 +26,14 @@ extern "C" {
     fn alert(s: &str);
 }
 
+extern crate web_sys;
+
+macro_rules! log {
+    ( $( $t:tt )* ) => {
+        web_sys::console::log_1(&format!( $( $t )* ).into());
+    }
+}
+
 #[wasm_bindgen]
 pub fn greet(name: &str) {
     alert(&format!("Hello, {}!", name));
@@ -55,6 +63,12 @@ pub struct Universe {
     cells: Vec<Cell>,
 }
 
+impl Default for Universe {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Universe {
     fn get_index(&self, row: u32, column: u32) -> usize {
         (row * self.width + column) as usize
@@ -77,6 +91,28 @@ impl Universe {
         count
     }
 
+<<<<<<< HEAD
+    pub fn get_cells(&self) -> &[Cell] {
+        &self.cells
+    }
+
+    pub fn set_cells(&mut self, cells: &[(u32, u32)]) {
+        for (row, col) in cells.iter().cloned() {
+            let idx = self.get_index(row, col);
+            self.cells[idx] = Cell::Alive;
+        }
+    }
+
+}
+
+#[wasm_bindgen]
+impl Universe {
+
+    pub fn new() -> Universe {
+        utils::set_panic_hook();
+        let width = 64;
+        let height = 64;
+=======
     fn make_cells(&self) -> Vec<Cell> {
         (0..self.width * self.height).map(|_i| Cell::Dead).collect()
     }
@@ -88,6 +124,7 @@ pub enum CellMotif {
     Spaceship,
     Random,
 }
+>>>>>>> f58d63855a4cc66146f4903967d978436512e9cd
 
 fn make_cells(width: u32, height: u32, motif: CellMotif) -> Vec<Cell> {
     let ranger = 0..width * height;
@@ -163,6 +200,16 @@ impl Universe {
         self.cells[idx].toggle();
     }
 
+    pub fn set_width(&mut self, width: u32) {
+        self.width = width;
+        self.cells = (0..width * self.height).map(|_i| Cell::Dead).collect();
+    }
+
+    pub fn set_height(&mut self, height: u32) {
+        self.height = height;
+        self.cells = (0..self.width * height).map(|_i| Cell::Dead).collect();
+    }
+
     pub fn tick(&mut self) {
         let mut next = self.cells.clone();
 
@@ -175,6 +222,9 @@ impl Universe {
                 let cell = self.cells[idx];
                 let live_neighbors = self.live_neighbor_count(row, column);
 
+<<<<<<< HEAD
+                log!("cell[{}, {}] is initially {:?} and has {} live neighbors", row, column, cell, live_neighbors);
+=======
                 log!(
                     "cell[{}, {}] is initially {:?} and has {} live neighbors",
                     row,
@@ -182,6 +232,7 @@ impl Universe {
                     cell,
                     live_neighbors
                 );
+>>>>>>> f58d63855a4cc66146f4903967d978436512e9cd
 
                 let next_cell = match (cell, live_neighbors) {
                     (Cell::Alive, x) if x < 2 => Cell::Dead,
@@ -191,6 +242,9 @@ impl Universe {
                     (otherwise, _) => otherwise,
                 };
 
+<<<<<<< HEAD
+                log!("    it becomes {:?}", next_cell);
+=======
                 log!("   it becomes {:?}", next_cell);
 
                 match (cell != next_cell, next_cell) {
@@ -198,6 +252,7 @@ impl Universe {
                     (true, Cell::Dead) => new_dead_cells.push((row, column)),
                     _ => {}
                 }
+>>>>>>> f58d63855a4cc66146f4903967d978436512e9cd
 
                 next[idx] = next_cell;
             }
@@ -230,12 +285,14 @@ impl fmt::Display for Universe {
                 let symbol = if cell == Cell::Dead { '◻' } else { '◼' };
                 write!(f, "{}", symbol)?;
             }
-            write!(f, "\n")?;
+            writeln!(f)?;
         }
 
         Ok(())
     }
 }
+<<<<<<< HEAD
+=======
 
 #[cfg(test)]
 impl Universe {
@@ -250,3 +307,4 @@ impl Universe {
         }
     }
 }
+>>>>>>> f58d63855a4cc66146f4903967d978436512e9cd
