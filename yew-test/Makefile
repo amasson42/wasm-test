@@ -8,13 +8,16 @@ setup:
 	@wasm-bindgen -V || cargo install wasm-bindgen-cli
 
 run:
-	trunk serve
+	sass --watch scss:styles --sourcemap=none & trunk serve && fg
 
 build:
+	sass scss/styles.scss styles/styles.css --style compressed
+#--sourcemap=none
 	trunk build --release
 
 clean:
 	cargo clean
 	trunk clean
+	rm -fr styles .sass-cache
 
 .PHONY: setup run build

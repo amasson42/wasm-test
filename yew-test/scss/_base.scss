@@ -1,0 +1,26 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+body {
+  font: 14px "Helvetica Neue", Helvetica, Arial, sans-serif;
+  line-height: 1.4em;
+  color: #4d4d4d;
+  min-width: 230px;
+  max-width: 1000px;
+  margin: 0 auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-font-smoothing: antialiased;
+  // font-smoothing: antialiased;
+  font-weight: 300;
+  background-color: #000000;
+}
+
+.footer-text {
+  color: aliceblue;
+  padding-left: 20px;
+  font-size: 14px;
+}

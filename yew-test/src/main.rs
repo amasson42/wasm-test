@@ -219,6 +219,8 @@ impl Component for Model {
                     </section>
                 </section>
 
+                <hr class="app-separator" />
+
                 <footer class="app-footer">
                     <strong class="footer-text">
                         { "Game of life - a yaw experiment" }

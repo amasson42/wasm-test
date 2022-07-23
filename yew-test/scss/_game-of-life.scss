@@ -1,0 +1,36 @@
+
+.game-area {
+  width: 94%;
+  margin: 20px auto;
+}
+
+.game-container {
+  background: #000000;
+  margin: 20px 0 0px 0;
+}
+
+.game-of-life {
+  display: inline-block;
+  background-color: aliceblue;
+  width: max-content;
+  overflow: hidden;
+}
+
+.game-row {
+  line-height: 0;
+}
+
+.game-cellule {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border: 1px solid #ccc;
+}
+
+.cellule-dead {
+  background-color: white;
+}
+
+.cellule-live {
+  background-color: black;
+}
