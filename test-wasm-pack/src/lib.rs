@@ -26,8 +26,6 @@ extern "C" {
     fn alert(s: &str);
 }
 
-extern crate web_sys;
-
 macro_rules! log {
     ( $( $t:tt )* ) => {
         web_sys::console::log_1(&format!( $( $t )* ).into());
@@ -65,7 +63,7 @@ pub struct Universe {
 
 impl Default for Universe {
     fn default() -> Self {
-        Self::new()
+        Self::new(CellMotif::Lines)
     }
 }
 
@@ -175,16 +173,6 @@ impl Universe {
     pub fn toggle_cell(&mut self, row: u32, column: u32) {
         let idx = self.get_index(row, column);
         self.cells[idx].toggle();
-    }
-
-    pub fn set_width(&mut self, width: u32) {
-        self.width = width;
-        self.cells = (0..width * self.height).map(|_i| Cell::Dead).collect();
-    }
-
-    pub fn set_height(&mut self, height: u32) {
-        self.height = height;
-        self.cells = (0..self.width * height).map(|_i| Cell::Dead).collect();
     }
 
     pub fn tick(&mut self) {
